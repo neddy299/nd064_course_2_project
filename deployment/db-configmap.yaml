@@ -5,5 +5,11 @@ data:
   DB_NAME: "geoconnections"
   DB_HOST: "postgres"
   DB_PORT: "5432"
+  GRPC_PERSON_HOST: "udaconnect-persons"
+  GRPC_PERSON_PORT: "5005"
+  GRPC_LOCATION_HOST: "udaconnect-locations"
+  GRPC_LOCATION_PORT: "5005"
+  KAFKA_HOST: "vdev1"
+  KAFKA_PORT: "9092"
 metadata:
   name: db-env

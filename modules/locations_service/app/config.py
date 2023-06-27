@@ -1,15 +1,15 @@
 import os
 from typing import List, Type
+from dotenv import load_dotenv
+
+# Add support for .env files
+load_dotenv()
 
 DB_USERNAME = os.environ["DB_USERNAME"]
 DB_PASSWORD = os.environ["DB_PASSWORD"]
 DB_HOST = os.environ["DB_HOST"]
 DB_PORT = os.environ["DB_PORT"]
 DB_NAME = os.environ["DB_NAME"]
-GRPC_LOCATION_HOST = os.environ["GRPC_LOCATION_HOST"]
-GRPC_LOCATION_PORT = os.environ["GRPC_LOCATION_PORT"]
-GRPC_PERSON_HOST = os.environ["GRPC_PERSON_HOST"]
-GRPC_PERSON_PORT = os.environ["GRPC_PERSON_PORT"]
 KAFKA_HOST = os.environ["KAFKA_HOST"]
 KAFKA_PORT = os.environ["KAFKA_PORT"]
 
@@ -18,12 +18,9 @@ class BaseConfig:
     USE_MOCK_EQUIVALENCY = False
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    GRPC_LOCATION_HOST = GRPC_LOCATION_HOST
-    GRPC_LOCATION_PORT = GRPC_LOCATION_PORT    
-    GRPC_PERSON_HOST = GRPC_PERSON_HOST
-    GRPC_PERSON_PORT = GRPC_PERSON_PORT
     KAFKA_HOST = KAFKA_HOST
     KAFKA_PORT = KAFKA_PORT
+    SQL_ECHO = False
 
 class DevelopmentConfig(BaseConfig):
     CONFIG_NAME = "dev"
@@ -36,6 +33,7 @@ class DevelopmentConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
+    SQL_ECHO = True
 
 
 class TestingConfig(BaseConfig):
@@ -47,6 +45,7 @@ class TestingConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql://{DB_USERNAME}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
     )
+    SQL_ECHO = True
 
 
 class ProductionConfig(BaseConfig):

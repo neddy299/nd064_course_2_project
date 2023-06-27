@@ -6,11 +6,13 @@ from app.udaconnect.schemas import (
     LocationSchema,
     PersonSchema,
 )
-from app.udaconnect.services import ConnectionService, LocationService, PersonService
+from app import grpcClient, kafkaClient
 from flask import request
 from flask_accepts import accepts, responds
 from flask_restx import Namespace, Resource
 from typing import Optional, List
+
+import udaconnect_pb2
 
 DATE_FORMAT = "%Y-%m-%d"
 
@@ -27,13 +29,14 @@ class LocationResource(Resource):
     @accepts(schema=LocationSchema)
     @responds(schema=LocationSchema)
     def post(self) -> Location:
-        request.get_json()
-        location: Location = LocationService.create(request.get_json())
-        return location
+        kafkaClient.create_location(request.get_json())
 
     @responds(schema=LocationSchema)
     def get(self, location_id) -> Location:
-        location: Location = LocationService.retrieve(location_id)
+        response = grpcClient.get_location(location_id)
+        location = Location(id=response.id, person_id=response.person_id, 
+                            coordinate=response.coordinate, wkt_shape=response.wkt_shape,
+                            creation_time=datetime.fromisoformat(response.creation_time))
         return location
 
 
@@ -43,12 +46,17 @@ class PersonsResource(Resource):
     @responds(schema=PersonSchema)
     def post(self) -> Person:
         payload = request.get_json()
-        new_person: Person = PersonService.create(payload)
-        return new_person
+        new_person = udaconnect_pb2.PersonMessage(first_name=payload["first_name"], last_name=payload["last_name"], company_name=payload["company_name"])
+        response = grpcClient.create_person(new_person)
+        return Person(id=response.id, first_name=response.first_name, last_name=response.last_name, company_name=response.company_name)
 
     @responds(schema=PersonSchema, many=True)
     def get(self) -> List[Person]:
-        persons: List[Person] = PersonService.retrieve_all()
+        response = grpcClient.get_person_all()
+        persons: List[Person] = []
+        for p in response.persons:
+            person = Person(id=p.id, first_name=p.first_name, last_name=p.last_name, company_name=p.company_name)
+            persons.append(person)
         return persons
 
 
@@ -57,7 +65,8 @@ class PersonsResource(Resource):
 class PersonResource(Resource):
     @responds(schema=PersonSchema)
     def get(self, person_id) -> Person:
-        person: Person = PersonService.retrieve(person_id)
+        response = grpcClient.get_person(person_id)
+        person = Person(id=response.id, first_name=response.first_name, last_name=response.last_name, company_name=response.company_name)        
         return person
 
 
@@ -68,16 +77,19 @@ class PersonResource(Resource):
 class ConnectionDataResource(Resource):
     @responds(schema=ConnectionSchema, many=True)
     def get(self, person_id) -> ConnectionSchema:
-        start_date: datetime = datetime.strptime(
-            request.args["start_date"], DATE_FORMAT
-        )
-        end_date: datetime = datetime.strptime(request.args["end_date"], DATE_FORMAT)
         distance: Optional[int] = request.args.get("distance", 5)
-
-        results = ConnectionService.find_contacts(
+        response = grpcClient.get_connections(
             person_id=person_id,
-            start_date=start_date,
-            end_date=end_date,
-            meters=distance,
+            start_date=request.args["start_date"],
+            end_date=request.args["end_date"],
+            distance=distance,
         )
+        results: List[Connection] = []
+        for conn in response.connections:
+            person = Person(id=conn.person.id, first_name=conn.person.first_name, last_name=conn.person.last_name, company_name=conn.person.company_name)
+            location = Location(id=conn.location.id, person_id=conn.location.person_id, 
+                coordinate=conn.location.coordinate, wkt_shape=conn.location.wkt_shape,
+                creation_time=datetime.fromisoformat(conn.location.creation_time))
+            connection = Connection(location=location, person=person)
+            results.append(connection)
         return results

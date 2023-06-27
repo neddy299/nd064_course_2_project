@@ -1,0 +1,26 @@
+
+This project provides three gRPC services. The ConnectionService and PersonService are hosted by the 
+psersons_service and the LocationService is hosted by the locations_service.
+
+
+Small python tests scripts are located in the ./tests folder.
+
+test_connection.py          - Connection FindContacts request
+test_location_get.py        - Location Retrieve request
+test_person_create.py       - Person Create request
+test_person_get.py          - Person Retrieve and RetrieveAll request
+
+
+
+# Example Person Retrieve request script
+
+import grpc
+import udaconnect_pb2
+import udaconnect_pb2_grpc
+
+channel = grpc.insecure_channel("localhost:5005")
+stub = udaconnect_pb2_grpc.PersonServiceStub(channel)
+
+print("Retrieve one")
+response = stub.Retrieve(udaconnect_pb2.PersonRequest(id=1))
+print(response)
