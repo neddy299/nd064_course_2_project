@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: Udaconnect - OpenAPI 3.0
+  description: Provides person and location services for the Udaconnect application
+  version: 1.0.0
+servers:
+  - url: http://localhost:30001/api
+paths:
+  /locations:
+    post:
+      summary: Creates a location event
+      operationId: addLocation
+      description: Adds an location event Inventory
+      responses:
+        '200':
+          description: Location created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Location'
+        description: Location to add
+  /locations/{location_id}:
+    get:
+      summary: Retrieve a location by location_id
+      operationId: getLocation
+      description: By passing in a location_id you can retrieve the location information
+      parameters:
+        - in: path
+          name: location_id
+          schema:
+            type: string
+          required: true
+          description: ID of the person to get
+      responses:
+        '200':
+          description: Successfully retrieved a location
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+  /persons:
+    post:
+      summary: Creates a person
+      operationId: addPerson
+      description: Adds an person
+      responses:
+        '200':
+          description: Person created
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Person'
+    get:
+      summary: Retrieve all persons
+      operationId: getPersonAll
+      description: Returns a list of all persons in the system
+      responses:
+        '200':
+          description: Successfully retrieved a person
+          content:
+            application/json:
+              schema:
+                type: array
+                items:              
+                  $ref: '#/components/schemas/Person'
+  /persons/{person_id}:
+    get:
+      summary: Retrieve a person by person_id
+      operationId: getPerson
+      description: By passing in a person_id you can retrieve the person information
+      parameters:
+        - in: path
+          name: person_id
+          schema:
+            type: string
+          required: true
+          description: ID of the person to get
+      responses:
+        '200':
+          description: Successfully retrieved a person
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+  /persons/{person_id}/connection:
+    get:
+      summary: Retrieve all connections for a person
+      operationId: getConnection
+      description: Find proxmity connections for a person between a date range and the specified distance
+      parameters:
+        - in: path
+          name: person_id
+          schema:
+            type: string
+          required: true
+          description: ID of the person to get
+        - name: start_date
+          in: query
+          description: start date for the connection window in format YYYY-MM-DD (i.e. 2020-01-01)
+          required: true
+          schema:
+            type: string
+        - name: end_date
+          in: query
+          description: End date for the connection window in format YYYY-MM-DD (i.e. 2020-12-30)
+          required: true
+          schema:
+            type: string          
+        - name: distance
+          in: query
+          description: Distance in meters for connection
+          required: true
+          schema:
+            type: string          
+      responses:
+        '200':
+          description: Successfully retrieved a person
+          content:
+            application/json:
+              schema:
+                type: array
+                items:              
+                  $ref: '#/components/schemas/Connection'                
+components:
+  schemas:
+    Location:
+      type: object
+      required:
+        - id
+        - person_id
+        - latitude
+        - longitude
+        - creation_time
+      properties:
+        id:
+          type: number
+          example: 1
+        person_id:
+          type: number
+          example: 1
+        latitude:
+          type: string
+          example: "35.0585136"
+        longitude:
+          type: string
+          example: "-106.5719566"
+        creation_time:
+         type: string
+         example: "2023-06-07T10:37:06"
+    Person:
+      type: object
+      required:
+        - id
+        - first_name
+        - last_name
+        - company_name
+      properties:
+        id:
+          type: number
+          example: 1
+        first_name:
+          type: string
+          example: "Pam"
+        last_name:
+          type: string
+          example: "Trexler"
+        company_name:
+          type: string
+          example: "Hampton, Hampton and McQuill"
+    Connection:
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/Location'
+        person:
+          $ref: '#/components/schemas/Person'
+  
