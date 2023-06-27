@@ -10,7 +10,7 @@ paths:
     post:
       summary: Creates a location event
       operationId: addLocation
-      description: Adds an location event Inventory
+      description: Adds a location event
       responses:
         '200':
           description: Location created
@@ -43,7 +43,7 @@ paths:
     post:
       summary: Creates a person
       operationId: addPerson
-      description: Adds an person
+      description: Adds a person
       responses:
         '200':
           description: Person created
@@ -88,7 +88,7 @@ paths:
     get:
       summary: Retrieve all connections for a person
       operationId: getConnection
-      description: Find proxmity connections for a person between a date range and the specified distance
+      description: Find proximity connections for a person between a date range and the specified distance
       parameters:
         - in: path
           name: person_id
@@ -98,13 +98,13 @@ paths:
           description: ID of the person to get
         - name: start_date
           in: query
-          description: start date for the connection window in format YYYY-MM-DD (i.e. 2020-01-01)
+          description: Start date for the connection window in the format YYYY-MM-DD (i.e. 2020-01-01)
           required: true
           schema:
             type: string
         - name: end_date
           in: query
-          description: End date for the connection window in format YYYY-MM-DD (i.e. 2020-12-30)
+          description: End date for the connection window in the format YYYY-MM-DD (i.e. 2020-12-30)
           required: true
           schema:
             type: string          
